@@ -142,14 +142,16 @@ export async function checkDeposit(transactionId, credentials) {
 }
 
 export function jsonResponse(payload, status = 200) {
+  const headers = {
+    "content-type": "application/json; charset=utf-8",
+    "cache-control": "no-store",
+    "access-control-allow-origin": "*",
+    "access-control-allow-headers": "content-type",
+    "access-control-allow-methods": "POST, OPTIONS",
+  };
+  if (status === 204 || status === 304) return new Response(null, { status, headers });
   return new Response(JSON.stringify(payload), {
     status,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      "cache-control": "no-store",
-      "access-control-allow-origin": "*",
-      "access-control-allow-headers": "content-type",
-      "access-control-allow-methods": "POST, OPTIONS",
-    },
+    headers,
   });
 }
