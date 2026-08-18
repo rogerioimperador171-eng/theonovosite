@@ -1,24 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
+import siteHtml from "../../public/index.html?raw";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+// A página é o site estático original (public/index.html), servido tal como
+// está para preservar design, animações, CSS e responsividade.
 export const Route = createFileRoute("/")({
+  server: {
+    handlers: {
+      GET: () =>
+        new Response(siteHtml, {
+          headers: { "content-type": "text/html; charset=utf-8" },
+        }),
+    },
+  },
+  head: () => ({
+    meta: [
+      { title: "Ajude Theo | Doe via Pix para o tratamento contra o Neuroblastoma" },
+      {
+        name: "description",
+        content:
+          "Theo tem 7 anos e luta contra um Neuroblastoma em estágio IV. Doe via Pix em segundos e ajude a custear o tratamento.",
+      },
+      { property: "og:title", content: "Ajude Theo | Doe via Pix" },
+      {
+        property: "og:description",
+        content:
+          "Doe via Pix e ajude Theo no tratamento contra o Neuroblastoma. QR Code e Pix copia e cola na hora.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+  return null;
 }
