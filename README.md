@@ -1,100 +1,113 @@
 # Ajude Theo — Doação via Pix (ProPix)
 
-Site de arrecadação com geração de Pix (QR Code + copia e cola) através da API **ProPix**
-(`https://api.propixbr.com`). As credenciais ficam sempre no servidor — nunca no frontend.
+Site de doação com geração de Pix (QR Code + copia e cola) e confirmação
+automática de pagamento. As credenciais da API ficam **apenas no servidor**
+(Netlify Functions / rotas de servidor), nunca no frontend.
+
+- API: `https://api.propixbr.com`
+- Geração: `POST /api/v1/deposit`
+- Consulta: `POST /api/v1/check`
 
 ## Estrutura
 
 ```
-public/                      site estático (HTML, CSS, JS, imagens, fontes)
-  index.html                 página da campanha (seção "QUAL VALOR VOCÊ DESEJA DOAR?")
-  css/pix-donation.css       estilos do novo módulo de doação (arquivo novo)
-  js/pix-donation.js         lógica de doação: valores, order bump, Pix, polling
+public/                     site estático (HTML/CSS/JS, design original)
+public/js/pix-donation.js   fluxo de doação (modal, QR Code, polling)
 netlify/functions/
-  pix-create.mts             gera o Pix (POST /api/v1/deposit)
-  pix-status.mts             consulta o pagamento (POST /api/v1/check)
-src/lib/propix.server.ts     integração compartilhada com a API ProPix
-src/routes/api/public/pix/   mesmas rotas para o preview/hospedagem Lovable
-netlify.toml                 configuração de deploy + redirects das funções
+  propix.mjs                integração com a API ProPix (server-side)
+  pix-create.mjs            função que gera o Pix
+  pix-status.mjs            função que consulta o status
+netlify.toml                build, funções e redirects
+src/                        versão do site servida pelo ambiente Lovable
+src/lib/propix.server.ts    mesma integração para as rotas de servidor
 ```
 
 O frontend chama sempre:
 
-- `POST /api/public/pix/create`
-- `POST /api/public/pix/status`
+- `POST /api/public/pix/create` → `{ transactionId, copyPaste, qrcodeUrl, status, amount }`
+- `POST /api/public/pix/status` → `{ transactionId, transactionState }`
 
-Na Netlify esses caminhos são redirecionados para as Functions; na Lovable são atendidos
-pelas rotas de servidor equivalentes. Ou seja, o mesmo código funciona nos dois lugares.
-
-## Como funciona a doação
-
-1. O visitante escolhe um valor (R$ 30, 40, 50, 70, 100, 150, 200, 300, 500, 750, 1.000) ou
-   digita um valor personalizado (mínimo **R$ 15,00**).
-2. Abre o modal com o banner do Theo e o **order bump** "Ajudar com medicamentos" (+ R$ 10,00).
-3. Ao clicar em **Doar**, a função serverless chama `POST /api/v1/deposit` com os headers
-   `x-client-id`, `x-client-secret` e `Content-Type: application/json`, enviando
-   `amount`, `description`, `payerName` e `payerDocument`.
-4. O modal exibe imediatamente o **QR Code**, o **Pix copia e cola**, o botão **Copiar código Pix**,
-   as instruções de pagamento, o status "Aguardando pagamento" e os dados do recebedor
-   (Instituição: ProPix / nome do destinatário).
-5. A cada 3 segundos o site consulta `POST /api/v1/check` com o `transactionId`. Quando o
-   `transactionState` for `COMPLETO`, o polling para e a tela de pagamento aprovado aparece
-   sem recarregar a página.
-
-Erros da API mostram uma mensagem amigável com botão **Tentar novamente**; timeouts (30s)
-também permitem nova tentativa. O site nunca quebra.
+Na Netlify esses caminhos são redirecionados para as Functions (ver `netlify.toml`).
 
 ## Variáveis de ambiente
 
-| Nome                   | Descrição                        |
-| ---------------------- | -------------------------------- |
-| `PROPAY_CLIENT_ID`     | Client ID da ProPix (`live_...`) |
+| Variável | Descrição |
+| --- | --- |
+| `PROPAY_CLIENT_ID` | Client ID da ProPix (`live_...`) |
 | `PROPAY_CLIENT_SECRET` | Client Secret da ProPix (`sk_...`) |
+| `PROPAY_BASE_URL` | Opcional. Padrão: `https://api.propixbr.com` |
 
-### Na Netlify
+Configurar na Netlify: **Site settings → Environment variables → Add a variable**
+(marque os escopos *Builds* e *Functions*, ambiente *Production* e *Deploy previews*).
+Depois de salvar, faça um novo deploy (**Deploys → Trigger deploy → Clear cache and deploy site**),
+pois variáveis novas só valem para deploys posteriores.
 
-1. Acesse **Site configuration → Environment variables**.
-2. Clique em **Add a variable** e cadastre `PROPAY_CLIENT_ID` e `PROPAY_CLIENT_SECRET`.
-3. Faça um novo deploy (**Deploys → Trigger deploy → Clear cache and deploy site**).
-
-### Na Lovable
-
-As mesmas variáveis já estão salvas nos secrets do projeto e são lidas pelas rotas de servidor.
+> Se as variáveis não estiverem configuradas, a API responde com a mensagem
+> "Pagamento indisponível: configure PROPAY_CLIENT_ID e PROPAY_CLIENT_SECRET…" —
+> é o erro mais comum de "não gera o Pix" na Netlify.
 
 ## Publicar na Netlify
 
-1. Conecte o repositório em **Add new site → Import an existing project** (ou arraste a pasta).
-2. A Netlify lê o `netlify.toml`:
-   - publish: `public`
-   - functions: `netlify/functions`
-3. Cadastre as variáveis de ambiente (acima) e faça o deploy.
+1. Suba o repositório para o GitHub/GitLab.
+2. Netlify → **Add new site → Import an existing project** e escolha o repositório.
+3. As configurações vêm do `netlify.toml`:
+   - Build command: `echo 'Site estatico: nenhum build necessario'`
+   - Publish directory: `public`
+   - Functions directory: `netlify/functions`
+4. Adicione `PROPAY_CLIENT_ID` e `PROPAY_CLIENT_SECRET` (seção acima).
+5. **Deploy site**.
 
 ## Testar localmente
 
 ```bash
-npm install
-npx netlify dev      # site em http://localhost:8888 com as Functions ativas
+npm install -g netlify-cli   # ou: bun add -g netlify-cli
+netlify dev
 ```
 
-Crie um arquivo `.env` local (não versionado) com:
+Crie um arquivo `.env` na raiz (baseado em `.env.example`) com as credenciais;
+o `netlify dev` carrega o `.env` automaticamente e serve o site em
+`http://localhost:8888` com as funções ativas.
 
-```
-PROPAY_CLIENT_ID=live_...
-PROPAY_CLIENT_SECRET=sk_...
+Teste rápido das funções:
+
+```bash
+curl -X POST http://localhost:8888/api/public/pix/create \
+  -H 'Content-Type: application/json' \
+  -d '{"amount":15,"description":"teste"}'
+
+curl -X POST http://localhost:8888/api/public/pix/status \
+  -H 'Content-Type: application/json' \
+  -d '{"transactionId":"COLE_O_ID_AQUI"}'
 ```
 
 ## Alterar Client ID / Client Secret
 
-Basta atualizar as variáveis `PROPAY_CLIENT_ID` e `PROPAY_CLIENT_SECRET` no painel da Netlify
-(ou nos secrets da Lovable) e refazer o deploy. **Nenhum arquivo de código precisa ser alterado.**
+Basta trocar os valores das variáveis `PROPAY_CLIENT_ID` e `PROPAY_CLIENT_SECRET`
+(na Netlify ou no `.env` local) e refazer o deploy. Nenhuma alteração de código
+é necessária — as credenciais não existem em nenhum arquivo do projeto.
 
 ## Atualizar a API no futuro
 
-Toda a comunicação com a ProPix está em `src/lib/propix.server.ts`:
+Toda a comunicação com a ProPix está concentrada em dois arquivos espelhados:
 
-- `PROPIX_BASE_URL` — altere aqui se a URL base mudar.
-- `createDeposit()` — endpoint `/api/v1/deposit` e campos enviados.
-- `checkDeposit()` — endpoint `/api/v1/check` e leitura do `transactionState`.
+- `netlify/functions/propix.mjs` (produção na Netlify)
+- `src/lib/propix.server.ts` (ambiente Lovable)
 
-As duas Netlify Functions e as rotas da Lovable apenas reutilizam essas funções, então uma
-mudança nesse arquivo vale para todos os ambientes.
+Para mudar endpoints, campos enviados ou nomes de campos da resposta, edite
+`createDeposit` / `checkDeposit` nesses arquivos. A leitura da resposta usa uma
+lista de nomes alternativos (`copyPaste`, `copiaECola`, `qrcode`…), então basta
+acrescentar o novo nome à lista caso a API mude. Para trocar a URL base, use a
+variável `PROPAY_BASE_URL`.
+
+## Fluxo de pagamento
+
+1. Usuário escolhe o valor e clica em **PAGAR COM PIX**.
+2. Frontend chama `/api/public/pix/create`; a função envia `amount`,
+   `description`, `payerName` e `payerDocument` com os headers
+   `x-client-id` / `x-client-secret`.
+3. QR Code, Pix copia e cola, botão **COPIAR PIX** e status
+   "Aguardando pagamento" aparecem imediatamente; `transactionId` é guardado.
+4. Polling a cada 3s em `/api/public/pix/status`. Quando `transactionState`
+   for `COMPLETO`, o polling para e a tela de pagamento aprovado aparece,
+   sem recarregar a página.
+5. Erros da API e timeouts exibem mensagem amigável com opção de tentar novamente.
