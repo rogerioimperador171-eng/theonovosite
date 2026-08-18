@@ -1,0 +1,30 @@
+[build]
+  # O site é estático (pasta public) — não é necessário nenhum passo de build.
+  command = "echo 'Site estatico: nenhum build necessario'"
+  publish = "public"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[functions]
+  node_bundler = "esbuild"
+  directory = "netlify/functions"
+
+[functions."pix-create"]
+  included_files = ["netlify/functions/propix.mjs"]
+
+[functions."pix-status"]
+  included_files = ["netlify/functions/propix.mjs"]
+
+[[redirects]]
+  from = "/api/public/pix/create"
+  to = "/.netlify/functions/pix-create"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/public/pix/status"
+  to = "/.netlify/functions/pix-status"
+  status = 200
+  force = true

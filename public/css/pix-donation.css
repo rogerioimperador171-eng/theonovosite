@@ -1,0 +1,544 @@
+/**
+ * Estilos do novo sistema de doação PIX (ProPix)
+ * Arquivo novo - não altera nenhum estilo existente do site.
+ */
+
+/* Campo de valor personalizado */
+.pixd-custom {
+  width: 100%;
+  margin: 12px 0 18px;
+  font-family: "Lato", "Poppins", sans-serif;
+}
+
+.pixd-custom-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  background: #fff;
+  padding: 0 14px;
+  height: 48px;
+}
+
+.pixd-custom-field:focus-within {
+  border-color: #00a651;
+  box-shadow: 0 0 0 3px rgba(0, 166, 81, 0.12);
+}
+
+.pixd-custom-prefix {
+  color: #8a8a8a;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+#pixd-custom-amount {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  /* 16px evita o zoom automatico do iOS ao focar o campo */
+  font-size: 16px;
+  color: #333;
+  height: 100%;
+  width: 100%;
+  padding: 0;
+}
+
+.pixd-custom-btn {
+  margin-top: 10px;
+  width: 100%;
+  height: 48px;
+  border: 0;
+  border-radius: 8px;
+  background: #00a651;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.pixd-custom-btn:hover {
+  filter: brightness(0.94);
+}
+
+.pixd-custom-error {
+  display: none;
+  margin: 8px 0 0;
+  color: #d93025;
+  font-size: 13px;
+}
+
+/* Modal */
+body.pixd-modal-open {
+  overflow: hidden;
+}
+
+#pix-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.65);
+  overflow-y: auto;
+  padding: 16px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.pixd-modal {
+  max-width: 460px;
+  width: 100%;
+  margin: 24px auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  font-family: "Lato", "Poppins", sans-serif;
+  text-align: center;
+}
+
+.pixd-banner {
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.pixd-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pixd-modal .pix-modal-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1c1c1c;
+  margin: 0 0 4px;
+}
+
+.pixd-modal .pix-modal-subtitle {
+  font-size: 14px;
+  color: #6b6b6b;
+  margin: 0 0 14px;
+}
+
+.pixd-modal .pix-amount-display {
+  font-size: 30px;
+  font-weight: 800;
+  color: #fff !important;
+  background: linear-gradient(135deg, #24ca68, #009d4e);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin: 0 0 16px;
+  letter-spacing: -0.5px;
+  box-shadow: 0 8px 20px rgba(0, 157, 78, 0.22);
+  text-shadow: none;
+}
+
+/* Order bump */
+.pixd-bump {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  border: 1px solid #e2efe7;
+  background: #f7fbf8;
+  border-radius: 14px;
+  padding: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.pixd-bump:hover {
+  border-color: #b9e4cb;
+}
+
+.pixd-bump:has(input:checked) {
+  border-color: #24ca68;
+  background: #f1fbf5;
+  box-shadow: 0 0 0 3px rgba(36, 202, 104, 0.12);
+}
+
+.pixd-bump input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pixd-bump-box {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border: 2px solid #00a651;
+  border-radius: 6px;
+  background: #fff;
+  position: relative;
+}
+
+.pixd-bump input:checked + .pixd-bump-box {
+  background: #00a651;
+}
+
+.pixd-bump input:checked + .pixd-bump-box::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.pixd-bump-text {
+  flex: 1;
+  display: block;
+  color: #1c1c1c;
+  font-size: 14px;
+}
+
+.pixd-bump-text small {
+  display: block;
+  color: #6b6b6b;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.pixd-bump-price {
+  font-weight: 800;
+  color: #00a651;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.pixd-total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 14px 0 4px;
+  font-size: 15px;
+  color: #1c1c1c;
+}
+
+.pixd-total-row strong {
+  font-size: 18px;
+  color: #00a651;
+}
+
+.pixd-modal .pix-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.pixd-modal .pix-button {
+  height: 50px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 0;
+}
+
+.pixd-modal .pix-button-primary {
+  background: #00a651;
+  color: #fff;
+}
+
+.pixd-modal .pix-button-outline {
+  background: #fff;
+  color: #1c1c1c;
+  border: 1px solid #d9d9d9;
+}
+
+.pixd-safe {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #8a8a8a;
+}
+
+/* Status + QR */
+.pixd-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff6e5;
+  color: #a76800;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.pixd-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #f5a623;
+  animation: pixd-pulse 1.2s infinite;
+}
+
+.pixd-status.pixd-status-paid {
+  background: #e8f8ef;
+  color: #00803e;
+}
+
+.pixd-status.pixd-status-paid .pixd-status-dot {
+  background: #00a651;
+  animation: none;
+}
+
+@keyframes pixd-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.pixd-qr {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.pixd-qr img {
+  width: 230px;
+  height: 230px;
+  object-fit: contain;
+  padding: 10px;
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.pixd-modal #pix-code {
+  display: block;
+  width: 100%;
+  min-height: 76px;
+  resize: none;
+  border: 1px solid #e3e3e3;
+  border-radius: 10px;
+  background: #fafafa;
+  padding: 10px;
+  font-size: 12px;
+  color: #444;
+  word-break: break-all;
+}
+
+.pixd-modal .pix-code-label {
+  display: block;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1c1c1c;
+  margin-bottom: 6px;
+}
+
+.pixd-modal .pix-instructions {
+  text-align: left;
+  background: #f7f7f7;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 16px;
+}
+
+.pixd-modal .pix-instructions h4 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: #1c1c1c;
+}
+
+.pixd-modal .pix-instructions ol {
+  margin: 0;
+  padding-left: 18px;
+  color: #555;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Bloco da instituicao (rodape do modal) */
+.pixd-receiver {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid #ececec;
+  border-radius: 14px;
+  background: #fbfbfc;
+  text-align: left;
+}
+
+.pixd-receiver-icon {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid #e4e4ea;
+  background: #fff;
+  color: #2b2b38;
+}
+
+.pixd-receiver-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pixd-receiver-info strong {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1c1c26;
+  line-height: 1.25;
+}
+
+.pixd-receiver-info span {
+  font-size: 12.5px;
+  color: #6f6f7d;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.pixd-done-icon {
+  width: 64px;
+  height: 64px;
+  margin: 6px auto 12px;
+  border-radius: 50%;
+  background: #00a651;
+  color: #fff;
+  font-size: 32px;
+  line-height: 64px;
+}
+
+@media (max-width: 480px) {
+  .pixd-modal {
+    padding: 16px;
+    margin: 12px auto;
+  }
+
+  .pixd-qr img {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+
+/* Botao secundario discreto */
+.pixd-modal .pix-button-ghost {
+  background: transparent;
+  color: #8a8a8a;
+  border: 0;
+  height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* Etapa de retencao (usuario tentou sair sem doar) */
+.pixd-exit-photo {
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.pixd-exit-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pixd-exit-highlight {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 16px 0 4px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #f1fbf5;
+  border: 1px solid #d8f0e2;
+  text-align: center;
+}
+
+.pixd-exit-highlight strong {
+  font-size: 15px;
+  color: #00803e;
+}
+
+.pixd-exit-highlight span {
+  font-size: 13px;
+  color: #4a5a51;
+  line-height: 1.45;
+}
+
+/* Fechar: alvo de toque confortavel no celular */
+.pixd-modal .close-modal {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: #3a3a3a;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Ajustes finos para celular */
+@media (max-width: 480px) {
+  .pixd-modal .pix-amount-display {
+    font-size: 26px;
+    padding: 14px 16px;
+  }
+
+  .pixd-modal .pix-modal-title {
+    font-size: 18px;
+  }
+
+  .pixd-bump-text small {
+    font-size: 11.5px;
+  }
+
+  .pixd-receiver {
+    padding: 12px;
+    gap: 10px;
+  }
+}
+
+/* Evita o zoom automatico do navegador ao focar campos no celular */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+input,
+select,
+textarea,
+button {
+  font-size: 16px;
+}
+
+body {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  touch-action: manipulation;
+}
