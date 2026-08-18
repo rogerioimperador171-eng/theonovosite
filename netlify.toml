@@ -9,6 +9,13 @@
 
 [functions]
   node_bundler = "esbuild"
+  directory = "netlify/functions"
+
+[functions."pix-create"]
+  included_files = ["netlify/functions/propix.mjs"]
+
+[functions."pix-status"]
+  included_files = ["netlify/functions/propix.mjs"]
 
 [[redirects]]
   from = "/api/public/pix/create"
